@@ -1,8 +1,16 @@
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { admin_login } from "../../store/Reducers/authReducer";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { admin_login, messageClear } from "../../store/Reducers/authReducer";
+import { PropagateLoader } from "react-spinners";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+
 const AdminLogin = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { loader, errorMessage, successMessage } = useSelector(
+    (state) => state.auth,
+  );
 
   const [userData, setUserData] = useState({
     email: "",
@@ -21,6 +29,27 @@ const AdminLogin = () => {
     dispatch(admin_login(userData));
     console.log(userData);
   };
+
+  const overrideStyle = {
+    display: "flex",
+    margin: "0 auto",
+    height: "24px",
+    justifyContent: "center",
+    alignItems: "center",
+  };
+
+  useEffect(() => {
+    if (errorMessage) {
+      toast.error(errorMessage);
+      dispatch(messageClear());
+    }
+    if (successMessage) {
+      toast.success(successMessage);
+      dispatch(messageClear());
+      navigate("/");
+    }
+  }, [dispatch, errorMessage, successMessage]);
+
   return (
     <div className="min-w-screen min-h-screen bg-[#cdcae9] flex justify-center items-center text-zinc-500">
       <div className="w-[350px] text-[#fffff] p-2">
@@ -29,6 +58,7 @@ const AdminLogin = () => {
             <div className="w-[180px] h-[50px]">
               <img
                 className="w-full h-full"
+                alt="FlipBuy"
                 src="http://localhost:3000/logo.png"
               />
             </div>
@@ -67,8 +97,15 @@ const AdminLogin = () => {
                 required
               />
             </div>
-            <button className="bg-slate-800 w-full hover:shadow-blue-300 hover:shadow-lg text-white rounded-md px-7 py-2 mb-3">
-              Login
+            <button
+              disabled={!!loader}
+              className="bg-slate-800 w-full hover:shadow-blue-300 hover:shadow-lg text-white rounded-md px-7 py-2 mb-3"
+            >
+              {loader ? (
+                <PropagateLoader color="white" cssOverride={overrideStyle} />
+              ) : (
+                "Login"
+              )}
             </button>
           </form>
         </div>
